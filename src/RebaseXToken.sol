@@ -93,7 +93,29 @@ contract RebaseXToken is ERC20 {
         return linearInterest;
     }
 
+    /*
+    * @notice Mint the accrued interest to the user since the last time they interacted with the contract
+    * @param _user The user to mint the accrued interest to
+    */
     function _mintAccuredInterest(address _user) internal {
+        uint256 previousPricipleBalance = super.balanceOf(_user);
+        uint256 currentBalance = balanceOf(_user);
+        uint256 balanceIncreased = currentBalance - previousPricipleBalance;
         s_userLastUpdatedTimestamp[_user] = block.timestamp;
-    } 
+        _mint(_user, balanceIncreased);
+    }
+
+    /*
+    * @notice Burn the user tokens when they withdraw from the vault
+    * @param _from The user from whom the tokens are to be burned
+    * @param _amount The amount of tokens that has to be burned
+    */
+    function burn(address _from, uint256 _amount) external {
+        // Mitigation against `dust`
+        if (_amount == type(uint256).max) {
+            _amount = balanceOf(_from);
+        }
+        _mintAccuredInterest(_from);
+        _burn(_from, _amount);
+    }
 }
