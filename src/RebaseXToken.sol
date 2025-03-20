@@ -4,7 +4,6 @@ pragma solidity ^0.8.26;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-
 /*
 * @title RebaseXToken
 * @author Jayakrishnan Ashok
@@ -72,6 +71,14 @@ contract RebaseXToken is ERC20 {
     }
 
     /*
+    * @notice Get the interest rate that is currently set for the protocol. 
+    * @returns The interest rate for the contract
+    */
+    function getInterestRate() external view returns(uint256) {
+        return s_interestRate;
+    }
+
+    /*
     * Calculate the balance for the user including the interest that has accumulated since the deposit
     * (principle balance) + some interest that has accrued
     * @param _user The user to calculate the balance for
@@ -117,5 +124,63 @@ contract RebaseXToken is ERC20 {
         }
         _mintAccuredInterest(_from);
         _burn(_from, _amount);
+    }
+
+    /*
+    * @notice To view the principle balance of a given user. This amount may be inaccurate because it reflects tokens recently accrued by the user.
+    * @param _user The user whose balance is to be viewed
+    * @returns The priciple balance of the given user
+    */
+    function principleBalanceOf(address _user) external view returns(uint256) {
+        return super.balanceOf(_user);
+    }
+
+    /*
+    * @notice Transfer tokens from one user to another user. Interest Rate will be updated to the current.
+    * @param _recipient The user to transfer the tokens to.
+    * @param _amount The amount of tokens to be transferred.
+    * @return True if the transfer was successful
+    */
+    function transfer(address _recipient, uint256 _amount) public override returns(bool) {
+        _mintAccuredInterest(msg.sender);
+        _mintAccuredInterest(_recipient);
+        if (_amount == type(uint256).max) {
+            _amount  = balanceOf(msg.sender);
+        }
+
+        // Inter-wallet transfers for the same user will adjust the receiving wallet's interest rate to the current global interest rate.
+        // This is implemented to mitigate the risk of users manipulating interest rates by initially investing small amounts to secure higher rates, 
+        // and subsequently transferring larger amounts from other wallets to benefit from the locked-in rate.
+        // This policy safeguards the protocol against potential long-term imbalances and ensures a fairer distribution of interest.
+        if(balanceOf(_recipient) == 0) {
+            s_userInterestRate[_recipient] = s_interestRate;
+        }
+
+        return super.transfer(_recipient, _amount);
+    }
+
+    /*
+    * @notice Transfer tokens from one user to another user. Interest Rate will be updated to the current.
+    * @param _recipient The user the tokens will be transferred from.
+    * @param _recipient The user to transfer the tokens to.
+    * @param _amount The amount of tokens to be transferred.
+    * @return True if the transfer was successful
+    */
+    function transferFrom(address _sender, address _recipient, uint256 _amount) public override returns(bool) {
+         _mintAccuredInterest(_sender);
+        _mintAccuredInterest(_recipient);
+        if (_amount == type(uint256).max) {
+            _amount  = balanceOf(_sender);
+        }
+
+        // Inter-wallet transfers for the same user will adjust the receiving wallet's interest rate to the current global interest rate.
+        // This is implemented to mitigate the risk of users manipulating interest rates by initially investing small amounts to secure higher rates, 
+        // and subsequently transferring larger amounts from other wallets to benefit from the locked-in rate.
+        // This policy safeguards the protocol against potential long-term imbalances and ensures a fairer distribution of interest.
+        if(balanceOf(_recipient) == 0) {
+            s_userInterestRate[_recipient] =s_interestRate;
+        }
+
+        return super.transferFrom(_sender, _recipient, _amount);
     }
 }
