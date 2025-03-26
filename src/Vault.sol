@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.26;
 
-import { IRebaseToken } from "./interfaces/IRebaseToken.sol";
+import { IRebaseXToken } from "./interfaces/IRebaseXToken.sol";
 
 contract Vault {
     // -------------- ERRORS -------------- 
     error Vault__RedeemFailed();
 
     // -------------- STATE VARIABLES -------------- 
-    IRebaseToken private immutable i_rebaseToken;
+    IRebaseXToken private immutable i_rebaseXToken;
     
     // -------------- EVENTS -------------- 
 
@@ -18,8 +18,8 @@ contract Vault {
 
     // -------------- FUNCTIONS -------------- 
 
-    constructor(IRebaseToken _rebaseToken) {
-        i_rebaseToken = _rebaseToken;
+    constructor(IRebaseXToken _rebaseXToken) {
+        i_rebaseXToken = _rebaseXToken;
     }
     
     /**
@@ -33,17 +33,16 @@ contract Vault {
     * @notice Allows users to deposit ETH into vault and mint rebase tokens in return
     */
     function deposit() external payable {
-        i_rebaseToken.mint(msg.sender, msg.value);
+        i_rebaseXToken.mint(msg.sender, msg.value);
         emit Deposit(msg.sender, msg.value);
     }
-
 
     /**
     * @notice Allows users to redeem their rebase tokens for ETH
     * @param _amount The amount of token that the user wishes to redeem
     */
     function redeem(uint256 _amount) external {
-        i_rebaseToken.burn(msg.sender, _amount);
+        i_rebaseXToken.burn(msg.sender, _amount);
         (bool success, ) = payable(msg.sender).call{value: _amount}("");
         if (!success) {
             revert Vault__RedeemFailed();
@@ -56,6 +55,6 @@ contract Vault {
     * @return The address of the rebase token
     */
     function getRebaseTokenAddress() external view returns(address) {
-        return address(i_rebaseToken);
+        return address(i_rebaseXToken);
     }
 }
