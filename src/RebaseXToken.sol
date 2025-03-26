@@ -6,7 +6,7 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
-/*
+/**
 * @title RebaseXToken
 * @author Jayakrishnan Ashok
 * @notice A Cross-chain rebase token that incentivises users to deposit into a vault and gain interest in rewards.
@@ -39,7 +39,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
 
     constructor() ERC20("RebaseXToken", "RXT") Ownable(msg.sender) {}
 
-    /*
+    /**
     * @notice Grant the mint and burn role to an account
     * @param _account The account to grant the mint and burn role to
     */
@@ -47,7 +47,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         _grantRole(MINT_AND_BURN_ROLE, _account);
     }
 
-    /*
+    /**
     * @notice Set the interest rate in the contract
     * @notice _newInterestRate is the interest rate that is to be set
     * @dev The interest rate can only decrease
@@ -61,7 +61,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         emit InterestRateSet(s_interestRate);
     }
 
-    /*
+    /**
     * @notice Mint the user tokens when they deposit into the vault
     * @param _to The user to mint the tokens to
     * @param _amount The amount of tokens to mint
@@ -73,7 +73,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         _mint(_to, _amount);
     }
 
-    /*
+    /**
     * @notice Get the interest rate for the user
     * @param _user The user to get the interest rate for
     * @return The interest rate for the user
@@ -82,15 +82,15 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         return s_userInterestRate[_user];
     }
 
-    /*
+    /**
     * @notice Get the interest rate that is currently set for the protocol. 
-    * @returns The interest rate for the contract
+    * @return The interest rate for the contract
     */
     function getInterestRate() external view returns(uint256) {
         return s_interestRate;
     }
 
-    /*
+    /**
     * Calculate the balance for the user including the interest that has accumulated since the deposit
     * (principle balance) + some interest that has accrued
     * @param _user The user to calculate the balance for
@@ -100,10 +100,10 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         return super.balanceOf(_user) * _calculateUserAccumulatedInterestSinceLastUpdate(_user) / PRECISION_FACTOR;
     }
 
-    /*
+    /**
     * @notice Calculate the interest that has accumulated since the last update
     * @param _user The user to calculate the interest accured since the deposit
-    * @return THe interest that has accumulated since the last update
+    * @return linearInterest The interest that has accumulated since the last update
     */
     function _calculateUserAccumulatedInterestSinceLastUpdate(address _user) public view returns(uint256 linearInterest) {
         // interest = principle amount + priciple amount * interest * time = (principle amount * (1 + interest * time))
@@ -112,7 +112,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         return linearInterest;
     }
 
-    /*
+    /**
     * @notice Mint the accrued interest to the user since the last time they interacted with the contract
     * @param _user The user to mint the accrued interest to
     */
@@ -124,7 +124,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         _mint(_user, balanceIncreased);
     }
 
-    /*
+    /**
     * @notice Burn the user tokens when they withdraw from the vault
     * @param _from The user from whom the tokens are to be burned
     * @param _amount The amount of tokens that has to be burned
@@ -138,16 +138,16 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         _burn(_from, _amount);
     }
 
-    /*
+    /**
     * @notice To view the principle balance of a given user. This amount may be inaccurate because it reflects tokens recently accrued by the user.
     * @param _user The user whose balance is to be viewed
-    * @returns The priciple balance of the given user
+    * @return The priciple balance of the given user
     */
     function principleBalanceOf(address _user) external view returns(uint256) {
         return super.balanceOf(_user);
     }
 
-    /*
+    /**
     * @notice Transfer tokens from one user to another user. Interest Rate will be updated to the current.
     * @param _recipient The user to transfer the tokens to.
     * @param _amount The amount of tokens to be transferred.
@@ -171,7 +171,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
         return super.transfer(_recipient, _amount);
     }
 
-    /*
+    /**
     * @notice Transfer tokens from one user to another user. Interest Rate will be updated to the current.
     * @param _recipient The user the tokens will be transferred from.
     * @param _recipient The user to transfer the tokens to.
