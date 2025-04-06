@@ -20,16 +20,17 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
 
     // -------------- STATE VARIABLES -------------- 
 
-    // state variable to keep track of interest rate
-    uint256 private s_interestRate = 5e10;
     // State variable to keep track of user's interest rates
     mapping(address => uint256) private s_userInterestRate;
     // State variable to keep track of when user's interest rates were updated
     mapping(address => uint256) private s_userLastUpdatedTimestamp;
     // Constant variable to track the precision factor
-    uint256 private constant PRECISION_FACTOR = 1e18;
+    uint256 private constant PRECISION_FACTOR = 1e27;
     // Role to allow minting and burning of tokens
     bytes32 public constant MINT_AND_BURN_ROLE = keccak256("MINT_AND_BURN_ROLE");
+
+    // state variable to keep track of interest rate
+    uint256 private s_interestRate = ( 5 * PRECISION_FACTOR ) / 1e8;
 
     // -------------- EVENTS -------------- 
 
@@ -130,10 +131,6 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
     * @param _amount The amount of tokens that has to be burned
     */
     function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
-        // Mitigation against `dust`
-        if (_amount == type(uint256).max) {
-            _amount = balanceOf(_from);
-        }
         _mintAccuredInterest(_from);
         _burn(_from, _amount);
     }

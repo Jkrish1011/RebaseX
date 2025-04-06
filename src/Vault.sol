@@ -42,6 +42,11 @@ contract Vault {
     * @param _amount The amount of token that the user wishes to redeem
     */
     function redeem(uint256 _amount) external {
+        // Mitigation against `dust`
+        if (_amount == type(uint256).max) {
+            _amount = i_rebaseXToken.balanceOf(msg.sender);
+        }
+
         i_rebaseXToken.burn(msg.sender, _amount);
         (bool success, ) = payable(msg.sender).call{value: _amount}("");
         if (!success) {
