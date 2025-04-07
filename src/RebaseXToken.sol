@@ -25,7 +25,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
     // State variable to keep track of when user's interest rates were updated
     mapping(address => uint256) private s_userLastUpdatedTimestamp;
     // Constant variable to track the precision factor
-    uint256 private constant PRECISION_FACTOR = 1e27;
+    uint256 private constant PRECISION_FACTOR = 1e18;
     // Role to allow minting and burning of tokens
     bytes32 public constant MINT_AND_BURN_ROLE = keccak256("MINT_AND_BURN_ROLE");
 
@@ -54,7 +54,7 @@ contract RebaseXToken is ERC20, Ownable, AccessControl {
     * @dev The interest rate can only decrease
     */
     function setInterestRate(uint256 _newInterestRate) external onlyOwner {
-        if(_newInterestRate < s_interestRate) {
+        if(_newInterestRate >= s_interestRate) {
             revert RebaseXToken__InterestRateCanOnlyDecrease(s_interestRate, _newInterestRate);
         }
         s_interestRate = _newInterestRate;
