@@ -33,7 +33,8 @@ contract Vault {
     * @notice Allows users to deposit ETH into vault and mint rebase tokens in return
     */
     function deposit() external payable {
-        i_rebaseXToken.mint(msg.sender, msg.value);
+        uint256 userInterestRate = i_rebaseXToken.getUserInterestRate(msg.sender);
+        i_rebaseXToken.mint(msg.sender, msg.value, userInterestRate);
         emit Deposit(msg.sender, msg.value);
     }
 

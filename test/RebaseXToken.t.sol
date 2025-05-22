@@ -169,7 +169,8 @@ contract RebaseXTokenTest is Test {
         amount = bound(amount, 1e5, type(uint96).max);
         vm.deal(user, amount);
         vm.prank(owner);
-        rebaseXToken.grantMintAndBurnRole(address(user));
+        rebaseXToken.grantMintAndBurnRole(user);
+        
 
         vm.prank(user);
         rebaseXToken.mint(user, 100);
