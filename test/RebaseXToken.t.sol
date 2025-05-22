@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.24;
 
 import { Test, console } from "forge-std/Test.sol";
 import { RebaseXToken } from "../src/RebaseXToken.sol";
@@ -134,7 +134,7 @@ contract RebaseXTokenTest is Test {
     function testCannotCallMintAndBurn() public {
         vm.prank(user);
         vm.expectRevert();
-        rebaseXToken.mint(user, 100);
+        rebaseXToken.mint(user, 100, rebaseXToken.getInterestRate());
 
         vm.expectRevert();
         rebaseXToken.burn(user, 100);
@@ -173,7 +173,7 @@ contract RebaseXTokenTest is Test {
         
 
         vm.prank(user);
-        rebaseXToken.mint(user, 100);
+        rebaseXToken.mint(user, 100, rebaseXToken.getInterestRate());
         rebaseXToken.burn(user, 100);
     }
 }
